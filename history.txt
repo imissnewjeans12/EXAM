@@ -10,3 +10,11 @@ Hardware configuration generated successfully.
 
 --- BASELINE CRASH LOG ---
 [SYSTEM] Avionics Bus initialized for Signature: 2200C2F5
+--- Launching Avionics Bus Master [Threads: 3] ---
+--- Telemetry Loop Terminated ---
+Total Register Writes: 36
+
+--- FINAL AVIONICS BUS REGISTER STATE ---
+Channel [LIDAR_FRONT ] -> Packets: 12 | Latest: 3.9048V | Status: SYNCED
+Channel [GPS_MAIN    ] -> Packets: 12 | Latest: 5.0741V | Status: SYNCED
+Channel [IMU_NAV     ] -> Packets: 12 | Latest: 0.0V | Status: SYNCED
