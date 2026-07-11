@@ -95,12 +95,12 @@ class AvionicsBusMaster:
                     "packets_received": 0,
                     "latest_voltage": 0.0,
                     "status": "INIT"
-            })
-            current_state["packets_received"] += 1
-            current_state["latest_voltage"] = round(normalized_signal, 4)
-            current_state["status"] = "SYNCED"
-            self.active_bus_register[channel_key] = current_state
-            self.total_cycles_executed += 1
+                })
+                current_state["packets_received"] += 1
+                current_state["latest_voltage"] = round(normalized_signal, 4)
+                current_state["status"] = "SYNCED"
+                self.active_bus_register[channel_key] = current_state
+                self.total_cycles_executed += 1
     def begin_flight_telemetry_loop(self, cycles_per_peripheral: int = 10):
         print(f"--- Launching Avionics Bus Master [Threads: {len(self.peripherals)}] ---")
         thread_pool = []
@@ -122,3 +122,13 @@ class AvionicsBusMaster:
         for channel, data in self.active_bus_register.items():
             print(f"Channel [{channel:12}] -> Packets: {data['packets_received']:2} | Latest: {data['latest_voltage']}V | Status: {data['status']}")
 
+if __name__ == "__main__":
+    bus_master = AvionicsBusMaster()
+
+    try:
+        bus_master.begin_flight_telemetry_loop(cycles_per_peripheral=12)
+
+    except Exception as e:
+        print("\n[CRITICAL SYSTEM FAULT] Unhandled Exception during flight loop:")
+        print(f"{type(e).__name__}: {str(e)}")
+        sys.exit(1)
