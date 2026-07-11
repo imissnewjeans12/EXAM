@@ -71,3 +71,54 @@ class IMUPeripheral(AvionicsPeripheral):
         self.buffer.push_frame(time.time(), simulated_voltage)
         return simulated_voltage
 
+class AvionicsBusMaster:
+    def __init__(self):
+        self.peripherals = [
+            LiDARPeripheral(pin_number=10, peripheral_name="LIDAR_FRONT"),
+            GPSPeripheral(pin_number=12, peripheral_name="GPS_MAIN"),
+            IMUPeripheral(pin_number=14, peripheral_name="IMU_NAV")
+        ]
+        self.active_bus_register = {}
+        self.total_cycles_executed = 0
+        self._register_lock = threading.Lock()
+    def _async_polling_worker(self, peripheral: AvionicsPeripheral, poll_cycles: int):
+        for _ in range(poll_cycles):
+            if not peripheral.is_active:
+                continue
+            raw_signal = peripheral.poll_raw_voltage()
+            time.sleep(CONFIG.get("bus_race_delay_sec", 0.002))
+            normalized_signal = (raw_signal * 5.0) / 3.3
+            channel_key = peripheral.peripheral_name
+            time.sleep(0.001)
+            with self._register_lock:
+                current_state = self.active_bus_register.get(channel_key, {
+                    "packets_received": 0,
+                    "latest_voltage": 0.0,
+                    "status": "INIT"
+            })
+            current_state["packets_received"] += 1
+            current_state["latest_voltage"] = round(normalized_signal, 4)
+            current_state["status"] = "SYNCED"
+            self.active_bus_register[channel_key] = current_state
+            self.total_cycles_executed += 1
+    def begin_flight_telemetry_loop(self, cycles_per_peripheral: int = 10):
+        print(f"--- Launching Avionics Bus Master [Threads: {len(self.peripherals)}] ---")
+        thread_pool = []
+        for peripheral in self.peripherals:
+            t = threading.Thread(
+                target=self._async_polling_worker,
+                args=(peripheral, cycles_per_peripheral),
+                name=f"Thread-{peripheral.peripheral_name}"
+            )
+            thread_pool.append(t)
+            t.start()
+        for t in thread_pool:
+            t.join()
+        print("--- Telemetry Loop Terminated ---")
+        print(f"Total Register Writes: {self.total_cycles_executed}")
+        self._dump_bus_diagnostics()
+    def _dump_bus_diagnostics(self):
+        print("\n--- FINAL AVIONICS BUS REGISTER STATE ---")
+        for channel, data in self.active_bus_register.items():
+            print(f"Channel [{channel:12}] -> Packets: {data['packets_received']:2} | Latest: {data['latest_voltage']}V | Status: {data['status']}")
+
