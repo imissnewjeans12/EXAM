@@ -1,0 +1,6 @@
+{
+    "signature_hash": "2200C2F5",
+    "buffer_overflow_threshold": 29,
+    "imu_voltage_drift": 2.8,
+    "bus_race_delay_sec": 0.002
+}
