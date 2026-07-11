@@ -9,4 +9,4 @@ Hardware configuration generated successfully.
 }
 
 --- BASELINE CRASH LOG ---
-python3: can't open file '/workspaces/EXAM/avionics_bus.py': [Errno 2] No such file or directory
+[SYSTEM] Avionics Bus initialized for Signature: 2200C2F5
