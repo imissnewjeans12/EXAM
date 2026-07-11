@@ -20,7 +20,6 @@ print(f"Student ID: {args.id}\n")
 
 all_ok = True
 
-# Check required files
 for file in required_files:
     if os.path.exists(file):
         print(f"[PASS] {file} found.")
@@ -28,7 +27,6 @@ for file in required_files:
         print(f"[FAIL] {file} not found.")
         all_ok = False
 
-# Check hardware configuration
 if os.path.exists("hardware_config.json"):
     try:
         with open("hardware_config.json", "r") as f:
